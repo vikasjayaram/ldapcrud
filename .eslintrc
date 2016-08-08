@@ -1,0 +1,26 @@
+{
+  "extends": "google",
+
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true
+  },
+
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "globalReturn": true,
+      "impliedStrict": true,
+      "experimentalObjectRestSpread": true
+    }
+  },
+
+  "rules": {
+    "no-multiple-empty-lines": ["error", {"max": 2}],
+    "curly": ["error", "multi"],
+    "quotes": ["error", "single"],
+    "arrow-parens": ["error", "always"]
+  }
+}

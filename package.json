@@ -1,0 +1,15 @@
+{
+  "name": "ldapcrud",
+  "version": "1.0.0",
+  "description": "A lightweight wrapper for ldapjs for CRUD actions and some more",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Constantine Karnaukhov <genteelknight@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "ldapjs": "^1.0.0",
+    "underscore": "^1.8.3"
+  }
+}
