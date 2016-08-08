@@ -8,6 +8,14 @@
   },
   "author": "Constantine Karnaukhov <genteelknight@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:hustlahusky/ldapcrud.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hustlahusky/ldapcrud/issues"
+  },
+  "homepage": "https://github.com/hustlahusky/ldapcrud",
   "dependencies": {
     "ldapjs": "^1.0.0",
     "underscore": "^1.8.3"
