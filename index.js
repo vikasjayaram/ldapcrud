@@ -270,7 +270,7 @@ class LDAPCRUD {
       let user = users[0];
 
       if (!newDN) newDN = user.cn;
-      else newDN = `${user.cn}, ${newDN}`;
+      else newDN = `cn=${user.cn},${newDN}`;
 
       this.createClient((err, client) => {
         if (err) return callback(err);
