@@ -169,7 +169,7 @@ class LDAPCRUD {
           console.log('referral: ' + referral.uris.join());
         });
 
-        res.on('error', function(err) {
+        res.on('error', (err) => {
           console.error('error: ' + err.message);
         });
 
@@ -222,7 +222,7 @@ class LDAPCRUD {
           }));
         });
 
-        client.modify(user.dn, changes, function(err) {
+        client.modify(user.dn, changes, (err) => {
           if (err) return callback(err);
           callback();
         });
@@ -245,7 +245,37 @@ class LDAPCRUD {
       this.createClient((err, client) => {
         if (err) return callback(err);
 
-        client.del(users[0].dn, function(err) {
+        client.del(users[0].dn, (err) => {
+          if (err) return callback(err);
+          callback();
+        });
+      });
+    });
+  }
+
+
+  /**
+   * Move user to other DN
+   * @param {string} filter (LDAP search filter)
+   * @param {string} newDN (new DN for user without cn)
+   * @param {function} callback (callback(err))
+   * @return {*} execute callback with error
+   */
+  move(filter, newDN, callback) {
+    if (!filter) return callback(new Error('filter is required'));
+
+    this.read({filter: filter}, (err, users) => {
+      if (err) return callback(err);
+
+      let user = users[0];
+
+      if (!newDN) newDN = user.cn;
+      else newDN = `${user.cn}, ${newDN}`;
+
+      this.createClient((err, client) => {
+        if (err) return callback(err);
+
+        client.modifyDN(user.dn, newDN, (err) => {
           if (err) return callback(err);
           callback();
         });
