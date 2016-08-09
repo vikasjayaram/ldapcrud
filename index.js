@@ -142,7 +142,7 @@ class LDAPCRUD {
     }
 
     this.createClient((err, client) => {
-      if (err) return console.error(err);
+      if (err) return callback(err);
 
       if (!options.filter) options.filter = '';
       options.filter = `(&${this.config.defaultFilter + options.filter})`;
