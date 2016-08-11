@@ -216,10 +216,11 @@ class LDAPCRUD {
           let attr = value.attr;
           mod[attr] = (value.type === 'delete') ? user[attr] : value.value;
 
-          changes.push(new ldap.Change({
-            operation: value.type,
-            modification: mod
-          }));
+          if (!_.isUndefined(mod[attr]))
+            changes.push(new ldap.Change({
+              operation: value.type,
+              modification: mod
+            }));
         });
 
         client.modify(user.dn, changes, (err) => {
