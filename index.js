@@ -223,6 +223,9 @@ class LDAPCRUD {
             }));
         });
 
+        if (changes.lenght === 0)
+          return callback();
+
         client.modify(user.dn, changes, (err) => {
           if (err) return callback(err);
           callback();
