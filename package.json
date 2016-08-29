@@ -1,6 +1,6 @@
 {
   "name": "ldapcrud",
-  "version": "1.1.5",
+  "version": "1.2.0",
   "description": "A lightweight wrapper for ldapjs for CRUD actions and some more",
   "main": "index.js",
   "scripts": {
