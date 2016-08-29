@@ -12,7 +12,29 @@ class LDAPCRUD {
   }
 
   /**
-   * Convert JS object to node model or to LDAP model
+   * Convert LDAP User model to yours format or vice versa.
+   * `model` param of config is required. Also you can use `flatten` module, if
+   * you have nested user object
+   *
+   * ### Example:
+   *
+   * ```javascript
+   * let user = flatten({
+   *   name: {
+   *     first: 'John',
+   *     last: 'Doe'
+   *   },
+   *   email: 'johndoe@mail.com'
+   * });
+   * let ldapModel = ldap.convertModel(user, true);
+   *
+   * // ldapModel === {
+   * //   sn: 'Doe',
+   * //   givenName: 'John',
+   * //   mail: 'johndoe@mail.com'
+   * // }
+   * ```
+   *
    * @param {object} data (JS object)
    * @param {boolean} [toLdapModel] (if true convert Node model to LDAP,
    * else LDAP to Node)
@@ -41,8 +63,17 @@ class LDAPCRUD {
 
   /**
    * Create LDAP client
-   * @param {string} [dn] (bind username)
-   * @param {string} [password] (bind password)
+   *
+   * ### Example:
+   *
+   * ```javascript
+   * ldap.createClient((err, client) => {
+   *   // Handle error and do something
+   * });
+   * ```
+   *
+   * @param {string} [dn] (custom User DN for bind)
+   * @param {string} [password] (custom password for bind)
    * @param {function} callback (callback(err, client))
    */
   createClient(dn, password, callback) {
@@ -67,7 +98,19 @@ class LDAPCRUD {
 
   /**
    * LDAP Authentication
-   * @param {string} dn (bind username)
+   *
+   * ### Example:
+   *
+   * ```javascript
+   * let dn = '(sAMAccountName=username)';
+   * let pwd = 'secret';
+   * ldap.authenticate(dn, pwd, (err, auth) => {
+   *   if (err) return console.error(err);
+   *   console.log('Authorize:', (auth) ? 'success' : 'failed');
+   * });
+   * ```
+   *
+   * @param {string} dn (User DN for bind)
    * @param {string} password (bind password)
    * @param {function} callback (callback(err, auth))
    * @return {*} interrupt executing on error
@@ -97,7 +140,29 @@ class LDAPCRUD {
 
 
   /**
-   * Create entry in LDAP
+   * Create entry in LDAP by provided entry properties.
+   *
+   * * `displayName`, `cn`, `name` properties generetes from `sn` and
+   * `givenName`.
+   * * `dn / distinguishedName` generetes by `cn`, provided `dn` property and
+   * `baseDN` property of config
+   * * `userPrincipalName` concatenates from provided `sAMAccountName` property
+   * and `suffix` property of config
+   *
+   * ### Example:
+   *
+   * ```javascript
+   * let entry = {
+   *   sn: 'User',
+   *   givenName: 'Test',
+   *   sAMAccountName: 'testUser',
+   *   mail: 'testUser@mail.com',
+   * };
+   * ldap.create(entry, (err) => {
+   *   // Handle error and do something
+   * });
+   * ```
+   *
    * @param {object} entry (user data)
    * @param {function} callback (callback)
    * @return {*} execute callback with error
@@ -116,8 +181,8 @@ class LDAPCRUD {
       entry.cn = entry.name = entry.displayName;
 
       let dn;
-      if (entry.dn) dn = entry.dn; else dn = 'OU=Individual';
-      dn = `CN=${entry.cn},${dn},${this.config.baseDN}`;
+      if (entry.dn) dn = `,${entry.dn},`; else dn = '';
+      dn = `CN=${entry.cn}${dn}${this.config.baseDN}`;
 
       entry.distinguishedName = dn;
       entry.userPrincipalName = entry.sAMAccountName + this.config.suffix;
@@ -131,7 +196,19 @@ class LDAPCRUD {
 
 
   /**
-   * Read entries in LDAP
+   * Read entries in LDAP.
+   * *`findUsers` is alias for `read`*
+   *
+   * ### Example:
+   *
+   * ```javascript
+   * ldap.read({
+   *   filter: '(sAMAccountName=username)'
+   * }, (err, users) => {
+   *   // Handle error and do something
+   * });
+   * ```
+   *
    * @param {object} [options] (search options)
    * @param {function} callback (callback)
    */
@@ -184,6 +261,35 @@ class LDAPCRUD {
 
   /**
    * Update user
+   *
+   * ### Example:
+   *
+   * Change password in Active Directory
+   *
+   * ```javascript
+   * function encodePassword(password) {
+   *   return new Buffer('"' + password + '"', 'utf16le').toString();
+   * }
+   *
+   * let pwd = 'secret';
+   * let attrs = [
+   *   {
+   *     type: 'replace',
+   *     attr: 'unicodePwd',
+   *     value: encodePassword(pwd)
+   *   },
+   *   {
+   *     type: 'replace',
+   *     attr: 'userAccountControl',
+   *     value: '66048'
+   *   }
+   * ];
+   *
+   * ldap.update('(sAMAccountName=username)', attrs, (err) => {
+   *   // Handle error and do something
+   * });
+   * ```
+   *
    * @param {string} filter (LDAP search filter)
    * @param {Array} changedAttrs (array of objects attributes to change)
    * @param {function} callback (callback(err))
@@ -236,6 +342,15 @@ class LDAPCRUD {
 
   /**
    * Delete user
+   *
+   * ### Example:
+   *
+   * ```javascript
+   * ldap.delete('(sAMAccountName=username)', (err) => {
+   *   // Handle error and do something
+   * });
+   * ```
+   *
    * @param {string} filter (LDAP search filter)
    * @param {function} callback (callback(err))
    * @return {*} execute callback with error
@@ -258,7 +373,7 @@ class LDAPCRUD {
 
 
   /**
-   * Move user to other DN
+   * Move user to other DN. **Work in progress! Not tested!**
    * @param {string} filter (LDAP search filter)
    * @param {string} newDN (new DN for user without cn)
    * @param {function} callback (callback(err))
