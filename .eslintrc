@@ -21,6 +21,7 @@
     "no-multiple-empty-lines": ["error", {"max": 2}],
     "curly": ["error", "multi"],
     "quotes": ["error", "single"],
-    "arrow-parens": ["error", "always"]
+    "arrow-parens": ["error", "always"],
+    "comma-dangle": ["error", "never"]
   }
 }

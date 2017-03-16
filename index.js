@@ -118,7 +118,7 @@ class LDAPCRUD {
   authenticate(dn, password, callback) {
     // Skip authentication if an empty username or password is provided.
     if (!dn || !password) {
-      var err = {
+      let err = {
         code: 0x31,
         errno: 'LDAP_INVALID_CREDENTIALS',
         description: 'The supplied credential is invalid'
@@ -180,8 +180,8 @@ class LDAPCRUD {
         entry.displayName = `${entry.givenName} ${entry.sn}`;
       entry.cn = entry.name = entry.displayName;
 
-      let dn;
-      if (entry.dn) dn = `,${entry.dn},`; else dn = '';
+      let dn = ',';
+      if (entry.dn) dn = `,${entry.dn},`;
       dn = `CN=${entry.cn}${dn}${this.config.baseDN}`;
 
       entry.distinguishedName = dn;
