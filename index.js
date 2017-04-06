@@ -298,6 +298,22 @@ class LDAPCRUD {
 
     let attrs = _.map(changedAttrs, (item) => item.attr);
 
+    // If givenName or sn are changed, rename entry
+    let rename = attrs.some((attr) => (['givenName', 'sn'].indexOf(attr) >= 0));
+
+    // if (rename) {
+    //   let sn = changedAttrs.find((item) => (item.attr === 'sn'));
+    //   let givenName = changedAttrs.find((item) => (item.attr === 'givenName'));
+    //   let fullName = `${entry.givenName} ${entry.sn}`;
+    //   // entry.cn = entry.name = displayName;
+
+    //   let dn = ',';
+    //   if (entry.dn) dn = `,${entry.dn},`;
+    //   dn = `CN=${entry.cn}${dn}${this.config.baseDN}`;
+
+    //   entry.distinguishedName = dn;
+    // }
+
     this.read({
       filter: filter,
       attributes: attrs
