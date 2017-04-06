@@ -296,31 +296,36 @@ class LDAPCRUD {
   update(filter, changedAttrs, callback) {
     if (_.isEmpty(changedAttrs)) return callback(new Error('Changes is empty'));
 
-    let attrs = _.map(changedAttrs, (item) => item.attr);
+    let attributes = _.map(changedAttrs, (item) => item.attr);
 
     // If givenName or sn are changed, rename entry
-    let rename = attrs.some((attr) => (['givenName', 'sn'].indexOf(attr) >= 0));
+    let rename = attributes.some((a) => (['givenName', 'sn'].indexOf(a) >= 0));
+    let newDN = false;
+    if (rename) attributes.push('givenName', 'sn');
 
-    // if (rename) {
-    //   let sn = changedAttrs.find((item) => (item.attr === 'sn'));
-    //   let givenName = changedAttrs.find((item) => (item.attr === 'givenName'));
-    //   let fullName = `${entry.givenName} ${entry.sn}`;
-    //   // entry.cn = entry.name = displayName;
-
-    //   let dn = ',';
-    //   if (entry.dn) dn = `,${entry.dn},`;
-    //   dn = `CN=${entry.cn}${dn}${this.config.baseDN}`;
-
-    //   entry.distinguishedName = dn;
-    // }
-
-    this.read({
-      filter: filter,
-      attributes: attrs
-    }, (err, users) => {
+    this.read({filter, attributes}, (err, users) => {
       if (err) return callback(err);
 
       let user = users[0];
+
+      // Get full name
+      if (rename) {
+        let sn = changedAttrs.find((a) => (a.attr === 'sn'));
+        let givenName = changedAttrs.find((a) => (a.attr === 'givenName'));
+
+        sn = (sn ? sn.value : user.sn);
+        givenName = (givenName ? givenName.value : user.givenName);
+        let fullName = `${givenName} ${sn}`;
+
+        // change displayName
+        changedAttrs.push({
+          type: 'replace',
+          attr: 'displayName',
+          value: fullName
+        });
+
+        newDN = `CN=${fullName},${this.config.baseDN}`;
+      }
 
       this.createClient((err, client) => {
         if (err) {
@@ -345,7 +350,12 @@ class LDAPCRUD {
 
         client.modify(user.dn, changes, (err) => {
           if (err) return callback(err);
-          callback();
+          if (!rename) return callback();
+
+          client.modifyDN(user.dn, newDN, (err) => {
+            if (err) return callback(err);
+            callback();
+          });
         });
       });
     });
