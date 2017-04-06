@@ -1,7 +1,7 @@
 'use strict';
 const ldap = require('ldapjs');
 const _ = require('underscore');
-
+const utils = require('./utils');
 
 class LDAPCRUD {
   constructor(config) {
@@ -9,6 +9,8 @@ class LDAPCRUD {
 
     // Alias for read
     this.findUsers = this.read;
+
+    this.utils = utils;
   }
 
   /**
@@ -267,16 +269,12 @@ class LDAPCRUD {
    * Change password in Active Directory
    *
    * ```javascript
-   * function encodePassword(password) {
-   *   return new Buffer('"' + password + '"', 'utf16le').toString();
-   * }
-   *
    * let pwd = 'secret';
    * let attrs = [
    *   {
    *     type: 'replace',
    *     attr: 'unicodePwd',
-   *     value: encodePassword(pwd)
+   *     value: ldap.utils.encodePassword(pwd)
    *   },
    *   {
    *     type: 'replace',
@@ -298,9 +296,7 @@ class LDAPCRUD {
   update(filter, changedAttrs, callback) {
     if (_.isEmpty(changedAttrs)) return callback(new Error('Changes is empty'));
 
-    let attrs = _.map(changedAttrs, (item) => {
-      return item.attr;
-    });
+    let attrs = _.map(changedAttrs, (item) => item.attr);
 
     this.read({
       filter: filter,
