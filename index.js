@@ -180,14 +180,14 @@ class LDAPCRUD {
 
       if (!entry.displayName)
         entry.displayName = `${entry.givenName} ${entry.sn}`;
-      entry.cn = entry.name = entry.displayName;
 
       let dn = ',';
       if (entry.dn) dn = `,${entry.dn},`;
       dn = `CN=${entry.cn}${dn}${this.config.baseDN}`;
 
-      entry.distinguishedName = dn;
-      if (!this.config.skipUPN) {
+      if (!this.config.skipForOpenLDAP) {
+        entry.cn = entry.name = entry.displayName;
+        entry.distinguishedName = dn;
         entry.userPrincipalName = entry.sAMAccountName + this.config.suffix;
       }
 

@@ -31,7 +31,7 @@ let config = {
     'sn',
     'givenName'
   ],
-  skipUPN: false,
+  skipForOpenLDAP: false,
   defaultFilter: '(mail=*@*)',
   suffix: '@Company.local',
   model: {
