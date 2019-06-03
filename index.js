@@ -187,7 +187,9 @@ class LDAPCRUD {
       dn = `CN=${entry.cn}${dn}${this.config.baseDN}`;
 
       entry.distinguishedName = dn;
-      entry.userPrincipalName = entry.sAMAccountName + this.config.suffix;
+      if (!this.config.skipUPN) {
+        entry.userPrincipalName = entry.sAMAccountName + this.config.suffix;
+      }
 
       client.add(dn, entry, (err) => {
         if (err) return callback(err);
